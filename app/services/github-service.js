@@ -2,7 +2,7 @@
 
 var GITHUB = 'https://api.github.com';
 
-// describe Github API
+// github api auth check
 mainApp.factory('GithubAuth', ['$resource', function ($resource) {
     return function (token) {
         return $resource(GITHUB, {}, {
@@ -11,7 +11,7 @@ mainApp.factory('GithubAuth', ['$resource', function ($resource) {
     }
 }]);
 
-// fork repo https://developer.github.com/v3/repos/forks/#create-a-fork
+// fork repo
 mainApp.factory('GithubFork', ['$resource', function ($resource) {
     return function (token) {
         return $resource(GITHUB + '/repos/:owner/:repo/forks', {owner: '@owner', repo: '@repo'},
@@ -29,7 +29,7 @@ mainApp.factory('GithubDelete', ['$resource', function ($resource) {
     }
 }]);
 
-// create file https://developer.github.com/v3/repos/contents/#create-a-file
+// create file
 mainApp.factory('GithubCreateFile', ['$resource', function ($resource) {
     return function (token) {
         return $resource(GITHUB + '/repos/:owner/:repo/contents/:path', {owner: '@owner', repo: '@repo', path: '@path'},
@@ -70,9 +70,6 @@ mainApp.factory('GithubUpdateFile', ['$resource', function ($resource) {
             {put: {method: 'PUT', cache: false, isArray: false, headers: {'Authorization': 'token ' + token}}});
     }
 }]);
-
-// get file content https://developer.github.com/v3/repos/contents/#get-contents
-
 
 mainApp.service('GithubService', ['$http', 'Base64',
     'GithubAuth', 'GithubFork', 'GithubHooks', 'GithubCreateFile', 'GithubDelete', 'GithubToken',
@@ -139,20 +136,13 @@ mainApp.service('GithubService', ['$http', 'Base64',
                 '/contents/' + path);
         };
 
-        // todo verify
         this.updateFile = function (owner, repo, path, content, sha, token) {
             return GithubUpdateFile(token).put({owner: owner, repo: repo, path: path},
-                {message: "Autocov build file update", content: Base64.encode(content), sha: sha},
-                function success(response) {
-                    // todo AutocovService.log(owner + '/' + repo + '/' + '/' + path + ' updated successfully');
-                },
-                function error(response) {
-                    // todo AutocovService.log(owner + '/' + repo + '/' + '/' + path + ' update failed');
-                }
+                {message: "Autocov build file update", content: Base64.encode(content), sha: sha}
             );
         };
 
-        this.travisFile = function (owner, repo, token) {
+        this.createTravisFile = function (owner, repo, token) {
             var content = Base64.encode(
                 "language: java\n" +
                 "sudo: false\n" +
@@ -164,5 +154,31 @@ mainApp.service('GithubService', ['$http', 'Base64',
             return GithubCreateFile(token).put({owner: owner, repo: repo, path: '.travis.yml'},
                 {message: '.travis.yml created', content: content}
             );
+        };
+
+        this.updateTravisFile = function (owner, repo, token) {
+            var ghService = this;
+            this.getFile(owner, repo, '.travis.yml').then(
+                function success(response) {
+                    var content = Base64.decode(response.data.content);
+                    var config = jsyaml.load(content);
+
+                    if (!config.language) config.language = "java";
+                    if (!config.sudo) config.sudo = false;
+
+                    if (!config["before_install"]) config["before_install"] = [];
+                    if (config["before_install"].indexOf("pip install --user codecov") == -1) {
+                        config["before_install"].push("pip install --user codecov");
+                    }
+
+                    if (!config["after_success"]) config["after_success"] = [];
+                    if (config["after_success"].indexOf("codecov") == -1) {
+                        config["after_success"].push("codecov");
+                    }
+
+                    content = jsyaml.dump(config);
+
+                    return ghService.updateFile(owner, repo, '.travis.yml', content, response.data.sha, token);
+            });
         }
     }]);

@@ -30,12 +30,23 @@ mainApp.controller('MainController', [
         }
 
         function createTravisFileInRepo(repo) {
-            GithubService.travisFile($scope.user.login, repo.repo, $scope.github.token).$promise.then(
+            GithubService.createTravisFile($scope.user.login, repo.repo, $scope.github.token).$promise.then(
                 function success() {
+                    repo.travis = true;
                     log('.travis.yml file for ' + $scope.user.login + '/' + repo.repo + ' created successfully');
                 },
                 function error() {
-                    log('Failed to create .travis.yml file for ' + $scope.user.login + '/' + repo.repo);
+                    GithubService.updateTravisFile($scope.user.login, repo.repo, $scope.github.token)
+                    //    .$promise.then(
+                    //    function() {
+                    //        repo.travis = true;
+                    //        log('.travis.yml file for ' + $scope.user.login + '/' + repo.repo + ' updated successfully');
+                    //    },
+                    //    function() {
+                    //        repo.travis = false;
+                    //        log('Failed to create .travis.yml file for ' + $scope.user.login + '/' + repo.repo);
+                    //    }
+                    //);
                 }
             );
         }
@@ -44,10 +55,19 @@ mainApp.controller('MainController', [
             GithubService.repoTree($scope.user.login, repo.repo).then(
                 function (response) {
                     if (response) {
-                        RepoAnalyzer.analyze($scope.user.login, repo.repo, response.data.tree, $scope.github.token);
+                        repo.type =
+                            RepoAnalyzer.analyze($scope.user.login, repo.repo, response.data.tree, $scope.github.token);
+
+                        if (repo.type) {
+                            repo.buildFile = true;
+                            log(repo.repo + ' build file updated successfully');
+
+                            return;
+                        }
                     }
-                    else
-                        log(i + ' structure analysis failed');
+
+                    repo.buildFile = false;
+                    log(repo.repo + ' structure analysis failed');
                 }
             );
         }
@@ -55,6 +75,13 @@ mainApp.controller('MainController', [
         function deleteRepo(repo) {
             GithubService.delete($scope.user.login, repo.repo, $scope.github.token).$promise.then(
                 function success(response) {
+                    repo.type = undefined;
+                    repo.forked = undefined;
+                    repo.travis = undefined;
+                    repo.buildFile = undefined;
+                    repo.status = undefined;
+                    repo.coverage = undefined;
+
                     log($scope.user.login + '/' + repo.repo + ' deleted successfully');
                 },
                 function error(response) {
@@ -68,22 +95,20 @@ mainApp.controller('MainController', [
         };
 
         $scope.load = function() {
-            $scope.user.login = sessionStorage.user;
-            $scope.repositories = sessionStorage.repositories;
-            $scope.repos = angular.fromJson(sessionStorage.repos);
-            $scope.github = angular.fromJson(sessionStorage.github);
-            $scope.travis = angular.fromJson(sessionStorage.travis);
-
+            $scope.user.login = window.localStorage.user;
+            $scope.repositories = window.localStorage.repositories;
+            $scope.repos = angular.fromJson(window.localStorage.repos);
+            $scope.github = angular.fromJson(window.localStorage.github);
+            $scope.travis = angular.fromJson(window.localStorage.travis);
             //$scope.$apply();
-
         };
 
         $scope.save = function() {
-            sessionStorage.user = $scope.user.login;
-            sessionStorage.repositories = $scope.repositories;
-            sessionStorage.repos = angular.toJson($scope.repos);
-            sessionStorage.github = angular.toJson($scope.github);
-            sessionStorage.travis = angular.toJson($scope.travis);
+            window.localStorage.user = $scope.user.login;
+            window.localStorage.repositories = $scope.repositories;
+            window.localStorage.repos = angular.toJson($scope.repos);
+            window.localStorage.github = angular.toJson($scope.github);
+            window.localStorage.travis = angular.toJson($scope.travis);
         };
 
         $scope.generateToken = function() {
@@ -163,7 +188,6 @@ mainApp.controller('MainController', [
 
         $scope.parser = document.createElement('a');
 
-        $scope.authGithub();
         //TravisAuth().post({'github_token': $scope.github.token}).$promise.then(
         //    function success(response) {
         //        log("Travis authenticated successfully")

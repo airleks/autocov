@@ -65,20 +65,11 @@ mainApp.service('RepoAnalyzer', function (Base64, GithubService) {
                             }
                         }
 
-                        if (!pluginUpdated)
-                        {
-                            jsonPom.project.build.plugins.plugin.push(jacocoPluginEntry);
-                        }
+                        if (!pluginUpdated) jsonPom.project.build.plugins.plugin.push(jacocoPluginEntry);
 
                         var newPom = x2js.json2xml_str(jsonPom);
 
-                        console.log('local hash: ' + Sha1.hash(pom));
-                        console.log('local path hash: ' + Sha1.hash(file.path));
-                        console.log('local content hash: ' + Sha1.hash(response.data.content));
-                        console.log('github hash: ' + file.sha);
-
-                        //GithubService.updateFile(owner, repo, file.path, newPom, Sha1.hash(newPom), token);
-                        // todo AutocovService.log(owner + '/' + repo + ' structure info retrieved');
+                        return GithubService.updateFile(owner, repo, file.path, newPom, response.data.sha, token);
                     },
                     function error(response) {
                         // todo AutocovService.log('Failed to get ' + owner + '/' + repo + '/' + path + ' structure info');

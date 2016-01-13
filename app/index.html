@@ -13,8 +13,8 @@
   <link rel="stylesheet" href="app.css">
   <script src="js/libs/jquery-2.1.4.min.js"></script>
   <script src="js/libs/bootstrap.min.js"></script>
-  <script src="js/libs/sha.js"></script>
   <script src="https://cdn.rawgit.com/abdmob/x2js/master/xml2json.js"></script>
+  <script src="js/libs/js-yaml.min.js"></script>
 </head>
 <body>
   <!--[if lt IE 7]>
@@ -29,7 +29,7 @@
     </div>
   </nav>
 
-  <div class="container" ng-controller="MainController">
+  <div class="container-fluid" ng-controller="MainController">
     <form class="form-inline">
       <div class="form-group">
         <label for="githubLogin">Github login</label>
@@ -63,7 +63,11 @@
     <form>
       <div class="form-group">
         <label for="repos">Repos</label>
-        <textarea id="repos" title='Paste list of repos here' ng-model="repositories" class="form-control" rows="6"></textarea>
+        <textarea id="repos" title='Paste list of repos here' ng-model="repositories" class="form-control" rows="5"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="logs">Logs</label>
+        <textarea id="logs" title='log' ng-model="logs" class="form-control" disabled="disabled" rows="5"></textarea>
       </div>
       <div class="form-group">
         <div class="btn-group">
@@ -92,20 +96,26 @@
         <tr ng-repeat="(k, v) in repos">
           <td><a class="btn vtn-link" href="{{k}}" target="_blank">{{k}}</a></td>
           <td>{{v.type}}</td>
-          <td>{{v.forked}}</td>
-          <td>{{v.travis}}</td>
-          <td>{{v.buildFile}}</td>
+          <td>
+            <!--<span ng-show="{{v.forked}}" class="glyphicon glyphicon glyphicon-ok text-success" aria-hidden="true"></span>-->
+            <!--<span ng-hide="{{v.forked}}" class="glyphicon glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>-->
+            {{v.forked}}
+          </td>
+          <td>
+            <!--<span ng-show="{{v.travis}}" class="glyphicon glyphicon glyphicon-ok text-success" aria-hidden="true"></span>-->
+            <!--<span ng-hide="{{v.travis}}" class="glyphicon glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>-->
+            {{v.travis}}
+          </td>
+          <td>
+            <!--<span ng-show="{{v.buildFile}}" class="glyphicon glyphicon glyphicon-ok text-success" aria-hidden="true"></span>-->
+            <!--<span ng-hide="{{v.buildFile}}" class="glyphicon glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>-->
+            {{v.buildFile}}
+          </td>
           <td>{{v.status}}</td>
           <td>{{v.coverage}}</td>
         </tr>
       </table>
     </div>
-    <form>
-      <div class="form-group">
-        <label for="logs">Logs</label>
-        <textarea id="logs" title='log' ng-model="logs" class="form-control" disabled="disabled" rows="25"></textarea>
-      </div>
-    </form>
   </div>
 
   <!-- In production use:
