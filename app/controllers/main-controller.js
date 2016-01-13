@@ -20,6 +20,20 @@ mainApp.controller('MainController', [
             $scope.logs += line + '\n';
         };
 
+        $scope.load = function() {
+            $scope.user.login = sessionStorage.user;
+            $scope.repositories = sessionStorage.repositories;
+            $scope.github = angular.fromJson(sessionStorage.github);
+            $scope.travis = angular.fromJson(sessionStorage.travis);
+        };
+
+        $scope.save = function() {
+            sessionStorage.user = $scope.user.login;
+            sessionStorage.repositories = $scope.repositories;
+            sessionStorage.github = angular.toJson($scope.github);
+            sessionStorage.travis = angular.toJson($scope.travis);
+        };
+
         $scope.generateToken = function() {
             GithubService.createToken($scope.user.login, $scope.user.password).$promise.then(
                 function (response) {
@@ -136,22 +150,5 @@ mainApp.controller('MainController', [
         //        log("Travis authentication failed")
         //    }
         //);
-
-        $.ajax({
-            url: 'https://api.travis-ci.org/auth/github',
-            type: 'post',
-            crossDomain: true,
-            data: JSON.stringify( {"github_token": $scope.github.token } ),
-            headers: {
-                'User-Agent': 'DevFactoryClient',
-                //'Travis-API-Version' : 2,
-                'Content-Type': 'application/vnd.travis-ci.2+json',
-                //'Accept': 'application/json'
-            },
-            dataType: 'json',
-            success: function (data) {
-                log("Travis authenticated successfully");
-            }
-        });
     }
 ]);
