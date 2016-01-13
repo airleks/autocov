@@ -16,6 +16,53 @@ mainApp.controller('MainController', [
             return (parsed.length >= 3) ? {owner: parsed[1], repo: parsed[2]} : null;
         }
 
+        function forkRepo(repo) {
+            GithubService.fork(repo.owner, repo.repo, $scope.github.token).$promise.then(
+                function success() {
+                    repo.forked = true;
+                    log(repo.owner + '/' + repo.repo + ' forked successfully');
+                },
+                function error() {
+                    repo.forked = false;
+                    log(repo.owner + '/' + repo.repo + ' fork failed');
+                }
+            );
+        }
+
+        function createTravisFileInRepo(repo) {
+            GithubService.travisFile($scope.user.login, repo.repo, $scope.github.token).$promise.then(
+                function success() {
+                    log('.travis.yml file for ' + $scope.user.login + '/' + repo.repo + ' created successfully');
+                },
+                function error() {
+                    log('Failed to create .travis.yml file for ' + $scope.user.login + '/' + repo.repo);
+                }
+            );
+        }
+
+        function setupRepoBuildFile(repo) {
+            GithubService.repoTree($scope.user.login, repo.repo).then(
+                function (response) {
+                    if (response) {
+                        RepoAnalyzer.analyze($scope.user.login, repo.repo, response.data.tree, $scope.github.token);
+                    }
+                    else
+                        log(i + ' structure analysis failed');
+                }
+            );
+        }
+
+        function deleteRepo(repo) {
+            GithubService.delete($scope.user.login, repo.repo, $scope.github.token).$promise.then(
+                function success(response) {
+                    log($scope.user.login + '/' + repo.repo + ' deleted successfully');
+                },
+                function error(response) {
+                    log($scope.user.login + '/' + repo.repo + ' delete failed');
+                }
+            );
+        }
+
         log = function(line) {
             $scope.logs += line + '\n';
         };
@@ -23,13 +70,18 @@ mainApp.controller('MainController', [
         $scope.load = function() {
             $scope.user.login = sessionStorage.user;
             $scope.repositories = sessionStorage.repositories;
+            $scope.repos = angular.fromJson(sessionStorage.repos);
             $scope.github = angular.fromJson(sessionStorage.github);
             $scope.travis = angular.fromJson(sessionStorage.travis);
+
+            //$scope.$apply();
+
         };
 
         $scope.save = function() {
             sessionStorage.user = $scope.user.login;
             sessionStorage.repositories = $scope.repositories;
+            sessionStorage.repos = angular.toJson($scope.repos);
             sessionStorage.github = angular.toJson($scope.github);
             sessionStorage.travis = angular.toJson($scope.travis);
         };
@@ -78,55 +130,25 @@ mainApp.controller('MainController', [
 
         $scope.fork = function () {
             for (var i in $scope.repos) {
-                var repo = $scope.repos[i];
-                GithubService.fork(repo.owner, repo.repo, $scope.github.token).$promise.then(
-                    function success() {
-                        log(repo.owner + '/' + repo.repo + ' forked successfully');
-                    },
-                    function error() {
-                        log(repo.owner + '/' + repo.repo + ' fork failed');
-                    }
-                );
+                forkRepo($scope.repos[i]);
             }
         };
 
         $scope.createTravisFile = function () {
             for (var i in $scope.repos) {
-                GithubService.travisFile($scope.user.login, $scope.repos[i].repo, $scope.github.token).$promise.then(
-                    function success() {
-                        log('.travis.yml file for ' + $scope.user.login + '/' + $scope.repos[i].repo + ' created successfully');
-                    },
-                    function error() {
-                        log('Failed to create .travis.yml file for ' + $scope.user.login + '/' + $scope.repos[i].repo);
-                    }
-                );
+                createTravisFileInRepo($scope.repos[i]);
             }
         };
 
         $scope.setupBuildFiles = function () {
             for (var i in $scope.repos) {
-                GithubService.repoTree($scope.user.login, $scope.repos[i].repo).then(
-                    function (response) {
-                        if (response) {
-                            RepoAnalyzer.analyze($scope.user.login, $scope.repos[i].repo, response.data.tree, $scope.github.token);
-                        }
-                        else
-                            log(i + ' structure analysis failed');
-                    }
-                );
+                setupRepoBuildFile($scope.repos[i]);
             }
         };
 
         $scope.deleteRepos = function () {
             for (var i in $scope.repos) {
-                GithubService.delete($scope.user.login, $scope.repos[i].repo, $scope.github.token).$promise.then(
-                    function success(response) {
-                        log($scope.user.login + '/' + $scope.repos[i].repo + ' deleted successfully');
-                    },
-                    function error(response) {
-                        log($scope.user.login + '/' + $scope.repos[i].repo + ' delete failed');
-                    }
-                );
+                deleteRepo($scope.repos[i]);
             }
         };
 

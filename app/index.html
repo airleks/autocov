@@ -77,6 +77,30 @@
           <button class="btn btn-primary" ng-click="deleteRepos();">Clear Repos</button>
         </div>
       </div>
+   </form>
+    <div class="row">
+      <table class="table">
+        <tr>
+          <th>Repo</th>
+          <th>Type</th>
+          <th>Forked</th>
+          <th>Travis File Created</th>
+          <th>Build File Updated</th>
+          <th>Build Status</th>
+          <th>Coverage</th>
+        </tr>
+        <tr ng-repeat="(k, v) in repos">
+          <td><a class="btn vtn-link" href="{{k}}" target="_blank">{{k}}</a></td>
+          <td>{{v.type}}</td>
+          <td>{{v.forked}}</td>
+          <td>{{v.travis}}</td>
+          <td>{{v.buildFile}}</td>
+          <td>{{v.status}}</td>
+          <td>{{v.coverage}}</td>
+        </tr>
+      </table>
+    </div>
+    <form>
       <div class="form-group">
         <label for="logs">Logs</label>
         <textarea id="logs" title='log' ng-model="logs" class="form-control" disabled="disabled" rows="25"></textarea>
