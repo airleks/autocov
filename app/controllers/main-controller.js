@@ -118,6 +118,8 @@ mainApp.controller('MainController', [
             GithubService.delete($scope.user.login, repo.repo, $scope.github.token).$promise.then(
                 function success(response) {
                     repo.type = undefined;
+                    repo.branch = undefined;
+                    repo.stars = undefined;
                     repo.forked = undefined;
                     repo.travis = undefined;
                     repo.buildFile = undefined;
