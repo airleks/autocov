@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="mainApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="mainApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="mainApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="mainApp" class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Coverage Verification</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css">
+  <script src="js/libs/jquery-2.1.4.min.js"></script>
+  <script src="js/libs/bootstrap.min.js"></script>
+  <script src="js/libs/sha.js"></script>
+  <script src="https://cdn.rawgit.com/abdmob/x2js/master/xml2json.js"></script>
+</head>
+<body>
+  <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+  <![endif]-->
+
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Code coverage</a> </div>
+      <div class="collapse navbar-collapse"></div>
+    </div>
+  </nav>
+
+  <div class="container" ng-controller="MainController">
+    <form class="form-inline">
+      <div class="form-group">
+        <label for="githubLogin">Github login</label>
+        <input type="text" ng-model="user.login" class="form-control" id="githubLogin" placeholder="github login">
+      </div>
+      <div class="form-group">
+        <label for="githubPassword">Github Password</label>
+        <input type="password" ng-model="user.password" class="form-control" id="githubPassword" placeholder="github password">
+      </div>
+      <div class="form-group">
+          <button class="btn btn-default" ng-click="generateToken()">Generate Token</button>
+      </div>
+    </form>
+    <br />
+    <form class="form-inline">
+      <div class="form-group">
+        <label for="githubToken">Github token</label>
+        <input type="text" ng-model="github.token" class="form-control" id="githubToken" placeholder="github token">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-default" ng-click="authGithub()">Test</button>
+      </div>
+    </form>
+    <br />
+    <form>
+      <div class="form-group">
+        <label for="repos">Repos</label>
+        <textarea id="repos" title='Paste list of repos here' ng-model="repositories" class="form-control" rows="6"></textarea>
+      </div>
+      <div class="form-group">
+        <div class="btn-group">
+          <button class="btn btn-default" ng-click="prepare();">Prepare</button>
+          <button class="btn btn-primary" ng-click="fork();">Fork</button>
+          <button class="btn btn-primary" ng-click="createTravisFile();">Create Travis File</button>
+          <button class="btn btn-success" ng-click="travisSync();" disabled="disabled">Sync with Travis</button>
+          <button class="btn btn-primary" ng-click="setupBuildFiles();">Setup Build Files</button>
+          <button class="btn btn-success" ng-click="travisBuild();" disabled="disabled">Travis Build</button>
+          <button class="btn btn-danger" ng-click="checkCoverage();" disabled="disabled">Check Coverage</button>
+          <button class="btn btn-primary" ng-click="deleteRepos();">Clear Repos</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="logs">Logs</label>
+        <textarea id="logs" title='log' ng-model="logs" class="form-control" disabled="disabled" rows="25"></textarea>
+      </div>
+    </form>
+  </div>
+
+  <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+  -->
+  <script src="js/libs/angular.min.js"></script>
+  <script src="js/libs/angular-route.min.js"></script>
+  <script src="js/libs/angular-resource.min.js"></script>
+  <script src="js/libs/angular-cookies.min.js"></script>
+  <script src="app.js"></script>
+  <script src="services/github-service.js"></script>
+  <script src="services/travis-service.js"></script>
+  <script src="services/repo-analyzer.js"></script>
+  <script src="controllers/main-controller.js"></script>
+
+  <!--<script src="view1/view1.js"></script>-->
+  <!--<script src="view2/view2.js"></script>-->
+  <!--<script src="components/version/version.js"></script>-->
+  <!--<script src="components/version/version-directive.js"></script>-->
+  <!--<script src="components/version/interpolate-filter.js"></script>-->
+</body>
+</html>
