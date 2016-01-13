@@ -69,7 +69,7 @@ mainApp.factory('GithubToken', ['$resource', 'Base64', function ($resource, Base
     }
 }]);
 
-// get repository structure https://developer.github.com/v3/git/trees/
+// get repository structure
 mainApp.factory('GithubUpdateFile', ['$resource', function ($resource) {
     return function (token) {
         return $resource(GITHUB + '/repos/:owner/:repo/contents/:path', {
@@ -89,11 +89,17 @@ mainApp.service('GithubService', ['$http', 'Base64',
               GithubUpdateFile) {
 
 
-        function commitInfo(owner, repo) {
+        function commitInfo(owner, repo, branch) {
             return $http.get('https://api.github.com/repos/' + owner + '/' + repo +
                 '/git/refs').then(
                 function success(response) {
-                    return response.data[0]['object'].sha;
+                    for (var i in response.data) {
+                        if (response.data[i].ref.indexOf('heads/' + branch) > 0) {
+                            return response.data[i]['object'].sha;
+                        }
+                    }
+
+                    return response.data[0]['object'].sha;  // why not?
                 },
                 function error(response) {
                     // todo AutocovService.log('Failed to get ' + owner + '/' + repo + ' commit info');
@@ -138,8 +144,8 @@ mainApp.service('GithubService', ['$http', 'Base64',
             return GithubDelete(token).delete({owner: owner, repo: repo});
         };
 
-        this.repoTree = function (owner, repo) {
-            return commitInfo(owner, repo)
+        this.repoTree = function (owner, repo, branch) {
+            return commitInfo(owner, repo, branch)
                 .then(function (sha) {
                     if (sha) return tree(owner, repo, sha)
                 });

@@ -21,6 +21,7 @@ mainApp.controller('MainController', [
             GithubService.repo(repo.owner, repo.repo, $scope.github.token).$promise.then(
                 function success(response) {
                     repo.stars = response['stargazers_count'];
+                    repo.branch = response['default_branch'];
                 },
                 function error() {
                     repo.stars = undefined;
@@ -64,7 +65,7 @@ mainApp.controller('MainController', [
         }
 
         function setupRepoBuildFile(repo) {
-            GithubService.repoTree($scope.user.login, repo.repo).then(
+            GithubService.repoTree($scope.user.login, repo.repo, repo.branch).then(
                 function (response) {
                     if (response) {
                         repo.type =
