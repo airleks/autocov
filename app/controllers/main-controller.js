@@ -3,10 +3,11 @@ mainApp.controller('MainController', [
     'RepoAnalyzer',
     'GithubService',
     'TravisAuth',
+    'CodecovService',
 
     function ($scope, $http, Base64,
               RepoAnalyzer,
-              GithubService, TravisAuth) {
+              GithubService, TravisAuth, CodecovService) {
         function parseGithubUrl(url) {
             // todo replace with url format validation
             if (!url || url.length == 0) return null;
@@ -72,6 +73,35 @@ mainApp.controller('MainController', [
             );
         }
 
+        function repoCoverage(repo) {
+            CodecovService.repos($scope.user.login, repo.repo, $scope.codecov.token).then(
+                function success(response) {
+
+                    if (response.data.report != null) {
+                        repo.lines = response.data.report.totals.lines;
+                        repo.covered = response.data.report.totals.lines - response.data.report.totals.missed;
+                        repo.coverage = response.data.coverage;
+
+                        log($scope.user.login + '/' + repo.repo + ' coverage estimated successfully');
+                    }
+                    else {
+                        repo.lines = undefined;
+                        repo.covered = undefined;
+                        repo.coverage = undefined;
+
+                        log($scope.user.login + '/' + repo.repo + ' coverage estimation failed!!!');
+                    }
+                },
+                function error() {
+                    repo.lines = undefined;
+                    repo.covered = undefined;
+                    repo.coverage = undefined;
+
+                    log($scope.user.login + '/' + repo.repo + ' coverage estimation failed');
+                }
+            );
+        }
+
         function deleteRepo(repo) {
             GithubService.delete($scope.user.login, repo.repo, $scope.github.token).$promise.then(
                 function success(response) {
@@ -80,6 +110,8 @@ mainApp.controller('MainController', [
                     repo.travis = undefined;
                     repo.buildFile = undefined;
                     repo.status = undefined;
+                    repo.lines = undefined;
+                    repo.covered = undefined;
                     repo.coverage = undefined;
 
                     log($scope.user.login + '/' + repo.repo + ' deleted successfully');
@@ -100,7 +132,7 @@ mainApp.controller('MainController', [
             $scope.repos = angular.fromJson(window.localStorage.repos);
             $scope.github = angular.fromJson(window.localStorage.github);
             $scope.travis = angular.fromJson(window.localStorage.travis);
-            //$scope.$apply();
+            $scope.codecov = angular.fromJson(window.localStorage.codecov);
         };
 
         $scope.save = function() {
@@ -109,6 +141,7 @@ mainApp.controller('MainController', [
             window.localStorage.repos = angular.toJson($scope.repos);
             window.localStorage.github = angular.toJson($scope.github);
             window.localStorage.travis = angular.toJson($scope.travis);
+            window.localStorage.codecov = angular.toJson($scope.codecov);
         };
 
         $scope.generateToken = function() {
@@ -171,6 +204,12 @@ mainApp.controller('MainController', [
             }
         };
 
+        $scope.checkCoverage = function() {
+            for (var i in $scope.repos) {
+                repoCoverage($scope.repos[i]);
+            }
+        };
+
         $scope.deleteRepos = function () {
             for (var i in $scope.repos) {
                 deleteRepo($scope.repos[i]);
@@ -181,6 +220,7 @@ mainApp.controller('MainController', [
         $scope.user = {login: '', password: ''};
         $scope.github = {token: ''};
         $scope.travis = {token: ''};
+        $scope.codecov = {token: ''};
 
         $scope.repos = {};
         $scope.repositories = '';

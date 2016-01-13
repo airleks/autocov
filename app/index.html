@@ -58,6 +58,10 @@
       <div class="form-group">
         <button class="btn btn-default" ng-click="authGithub()">Test</button>
       </div>
+      <div class="form-group">
+        <label for="codecovToken">Codecov token</label>
+        <input type="text" ng-model="codecov.token" class="form-control" id="codecovToken" placeholder="github token">
+      </div>
     </form>
     <br />
     <form>
@@ -77,7 +81,7 @@
           <button class="btn btn-success" ng-click="travisSync();" disabled="disabled">Sync with Travis</button>
           <button class="btn btn-primary" ng-click="setupBuildFiles();">Setup Build Files</button>
           <button class="btn btn-success" ng-click="travisBuild();" disabled="disabled">Travis Build</button>
-          <button class="btn btn-danger" ng-click="checkCoverage();" disabled="disabled">Check Coverage</button>
+          <button class="btn btn-danger" ng-click="checkCoverage();">Check Coverage</button>
           <button class="btn btn-primary" ng-click="deleteRepos();">Clear Repos</button>
         </div>
       </div>
@@ -88,9 +92,11 @@
           <th>Repo</th>
           <th>Type</th>
           <th>Forked</th>
-          <th>Travis File Created</th>
-          <th>Build File Updated</th>
+          <th>Travis .yml</th>
+          <th>Travis synch</th>
           <th>Build Status</th>
+          <th>Lines</th>
+          <th>Covered</th>
           <th>Coverage</th>
         </tr>
         <tr ng-repeat="(k, v) in repos">
@@ -112,6 +118,8 @@
             {{v.buildFile}}
           </td>
           <td>{{v.status}}</td>
+          <td>{{v.lines}}</td>
+          <td>{{v.covered}}</td>
           <td>{{v.coverage}}</td>
         </tr>
       </table>
@@ -128,6 +136,7 @@
   <script src="app.js"></script>
   <script src="services/github-service.js"></script>
   <script src="services/travis-service.js"></script>
+  <script src="services/codecov-service.js"></script>
   <script src="services/repo-analyzer.js"></script>
   <script src="controllers/main-controller.js"></script>
 
