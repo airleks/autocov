@@ -17,6 +17,17 @@ mainApp.controller('MainController', [
             return (parsed.length >= 3) ? {owner: parsed[1], repo: parsed[2]} : null;
         }
 
+        function getRepo(repo) {
+            GithubService.repo(repo.owner, repo.repo, $scope.github.token).$promise.then(
+                function success(response) {
+                    repo.stars = response['stargazers_count'];
+                },
+                function error() {
+                    repo.stars = undefined;
+                }
+            );
+        }
+
         function forkRepo(repo) {
             GithubService.fork(repo.owner, repo.repo, $scope.github.token).$promise.then(
                 function success() {
@@ -171,6 +182,7 @@ mainApp.controller('MainController', [
                 else {
                     log('Parsed to ' + JSON.stringify(repo));
                     $scope.repos[reposArr[i]] = repo;
+                    getRepo(repo);
                 }
             }
         };

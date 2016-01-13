@@ -90,10 +90,11 @@
       <table class="table">
         <tr>
           <th>Repo</th>
+          <th>Stars</th>
           <th>Type</th>
           <th>Forked</th>
           <th>Travis .yml</th>
-          <th>Travis synch</th>
+          <th>Travis sync</th>
           <th>Build Status</th>
           <th>Lines</th>
           <th>Covered</th>
@@ -101,6 +102,7 @@
         </tr>
         <tr ng-repeat="(k, v) in repos">
           <td><a class="btn vtn-link" href="{{k}}" target="_blank">{{k}}</a></td>
+          <td>{{v.stars}}</td>
           <td>{{v.type}}</td>
           <td>
             <!--<span ng-show="{{v.forked}}" class="glyphicon glyphicon glyphicon-ok text-success" aria-hidden="true"></span>-->

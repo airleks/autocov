@@ -11,6 +11,16 @@ mainApp.factory('GithubAuth', ['$resource', function ($resource) {
     }
 }]);
 
+// get repo
+mainApp.factory('GithubRepo', ['$resource', function ($resource) {
+    return function (token) {
+        return $resource(GITHUB + '/repos/:owner/:repo', {owner: '@owner', repo: '@repo'},
+            {
+                get: {method: 'get', cache: false, isArray: false, headers: {'Authorization': 'token ' + token}}
+            })
+    }
+}]);
+
 // fork repo
 mainApp.factory('GithubFork', ['$resource', function ($resource) {
     return function (token) {
@@ -72,10 +82,10 @@ mainApp.factory('GithubUpdateFile', ['$resource', function ($resource) {
 }]);
 
 mainApp.service('GithubService', ['$http', 'Base64',
-    'GithubAuth', 'GithubFork', 'GithubHooks', 'GithubCreateFile', 'GithubDelete', 'GithubToken',
+    'GithubAuth', 'GithubRepo', 'GithubFork', 'GithubHooks', 'GithubCreateFile', 'GithubDelete', 'GithubToken',
     'GithubUpdateFile',
     function ($http, Base64,
-              GithubAuth, GithubFork, GithubHooks, GithubCreateFile, GithubDelete, GithubToken,
+              GithubAuth, GithubRepo, GithubFork, GithubHooks, GithubCreateFile, GithubDelete, GithubToken,
               GithubUpdateFile) {
 
 
@@ -114,6 +124,10 @@ mainApp.service('GithubService', ['$http', 'Base64',
                     scopes: ["repo", "delete_repo", "read:org", "user:email", "repo_deployment", "repo:status", "write:repo_hook"]
                 }
             );
+        };
+
+        this.repo = function (owner, repo, token) {
+            return GithubRepo(token).get({owner: owner, repo: repo});
         };
 
         this.fork = function (owner, repo, token) {
