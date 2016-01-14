@@ -14,11 +14,15 @@ mainApp.service('RepoAnalyzer', function (Base64, GithubService) {
                     var path = paths[i].path;
                     if (path.slice(path.length - 7) == 'pom.xml') {
                         collected.push(paths[i]);
-                        break; // we only need a root pom
+                        // break; // we only need a root pom
                     }
                 }
 
-                return collected;
+                collected.sort(function (a, b) {
+                    return a.path.length - b.path.length
+                });
+                //take shortest path
+                return collected.length > 0 ? [collected[0]] : [];
             },
             update: function (owner, repo, file, token) {
                 GithubService.getFile(owner, repo, file.path).then(
@@ -27,8 +31,9 @@ mainApp.service('RepoAnalyzer', function (Base64, GithubService) {
                         var jsonPom = x2js.xml_str2json(pom);
 
                         if (!jsonPom.project.build) jsonPom.project.build = {};
-                        if (!jsonPom.project.build.plugins) jsonPom.project.build.plugins = {};
-                        if (!jsonPom.project.build.plugins.plugin) jsonPom.project.build.plugins.plugin = [];
+                        if (!jsonPom.project.build.plugins) jsonPom.project.build.plugins = [];
+                        if (!jsonPom.project.build.plugins) jsonPom.project.build.plugins.plugin = {};
+                        //if (!jsonPom.project.build.plugins.plugin) jsonPom.project.build.plugins.plugin = [];
 
                         var jacocoPluginEntry =
                         {
@@ -53,19 +58,26 @@ mainApp.service('RepoAnalyzer', function (Base64, GithubService) {
                             }
                         };
 
-                        var pluginUpdated = false;
+                        if (jsonPom.project.build.plugins.plugin instanceof Array) {
+                            var pluginUpdated = false;
+                            for (var i in jsonPom.project.build.plugins.plugin) {
+                                if (jsonPom.project.build.plugins.plugin[i].artifactId == "jacoco-maven-plugin") {
+                                    jsonPom.project.build.plugins.plugin[i] = jacocoPluginEntry;
+                                    pluginUpdated = true;
+                                    break;
+                                }
+                            }
 
-                        for (var i in jsonPom.project.build.plugins.plugin)
-                        {
-                            if (jsonPom.project.build.plugins.plugin[i].artifactId == "jacoco-maven-plugin")
-                            {
-                                jsonPom.project.build.plugins.plugin[i] = jacocoPluginEntry;
-                                pluginUpdated = true;
-                                break;
+                            if (!pluginUpdated) jsonPom.project.build.plugins.plugin.push(jacocoPluginEntry);
+
+                        } else {
+                            if (jsonPom.project.build.plugins.plugin.artifactId == "jacoco-maven-plugin") {
+                                jsonPom.project.build.plugins.plugin = jacocoPluginEntry;
+                            } else {
+                                var oldPlugin = jsonPom.project.build.plugins.plugin;
+                                jsonPom.project.build.plugins.plugin = [oldPlugin, jacocoPluginEntry];
                             }
                         }
-
-                        if (!pluginUpdated) jsonPom.project.build.plugins.plugin.push(jacocoPluginEntry);
 
                         var newPom = x2js.json2xml_str(jsonPom);
 

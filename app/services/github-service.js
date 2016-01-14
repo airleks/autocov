@@ -169,7 +169,10 @@ mainApp.service('GithubService', ['$http', 'Base64',
                 "before_install:\n" +
                 "  - pip install --user codecov\n" +
                 "after_success:\n" +
-                "   - codecov");
+                "   - codecov\n" +
+                "jdk:\n" +
+                "   - oraclejdk8"
+            );
 
             return GithubCreateFile(token).put({owner: owner, repo: repo, path: '.travis.yml'},
                 {message: '.travis.yml created', content: content}
@@ -196,6 +199,10 @@ mainApp.service('GithubService', ['$http', 'Base64',
                         config["after_success"].push("codecov");
                     }
 
+                    if (!config["jdk"]) config["jdk"] = [];
+                    if (config["jdk"].indexOf("oraclejdk8") == -1) {
+                        config["jdk"].push("oraclejdk8");
+                    }
                     content = jsyaml.dump(config);
 
                     return ghService.updateFile(owner, repo, '.travis.yml', content, response.data.sha, token);
