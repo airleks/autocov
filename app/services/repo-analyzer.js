@@ -25,14 +25,14 @@ mainApp.service('RepoAnalyzer', function (Base64, GithubService) {
                 return collected.length > 0 ? [collected[0]] : [];
             },
             update: function (owner, repo, file, token) {
-                GithubService.getFile(owner, repo, file.path).then(
+                GithubService.getFile(owner, repo, file.path, token).then(
                     function success(response) {
                         var pom = Base64.decode(response.data.content);
                         var jsonPom = x2js.xml_str2json(pom);
 
                         if (!jsonPom.project.build) jsonPom.project.build = {};
                         if (!jsonPom.project.build.plugins) jsonPom.project.build.plugins = [];
-                        if (!jsonPom.project.build.plugins) jsonPom.project.build.plugins.plugin = {};
+                        if (!jsonPom.project.build.plugins.plugin) jsonPom.project.build.plugins.plugin = {};
                         //if (!jsonPom.project.build.plugins.plugin) jsonPom.project.build.plugins.plugin = [];
 
                         var jacocoPluginEntry =

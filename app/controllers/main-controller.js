@@ -65,7 +65,7 @@ mainApp.controller('MainController', [
         }
 
         function setupRepoBuildFile(repo) {
-            GithubService.repoTree($scope.user.login, repo.repo, repo.branch).then(
+            GithubService.repoTree($scope.user.login, repo.repo, repo.branch, $scope.github.token).then(
                 function (response) {
                     if (response) {
                         repo.type =
@@ -101,7 +101,7 @@ mainApp.controller('MainController', [
                         repo.covered = undefined;
                         repo.coverage = undefined;
 
-                        log($scope.user.login + '/' + repo.repo + ' coverage estimation failed!!!');
+                        log($scope.user.login + '/' + repo.repo + ' coverage estimation still not ready');
                     }
                 },
                 function error() {

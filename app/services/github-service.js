@@ -89,7 +89,8 @@ mainApp.service('GithubService', ['$http', 'Base64',
               GithubUpdateFile) {
 
 
-        function commitInfo(owner, repo, branch) {
+        function commitInfo(owner, repo, branch, token) {
+            $http.defaults.headers.common.Authorization = 'token ' + token;
             return $http.get('https://api.github.com/repos/' + owner + '/' + repo +
                 '/git/refs').then(
                 function success(response) {
@@ -107,7 +108,8 @@ mainApp.service('GithubService', ['$http', 'Base64',
             );
         }
 
-        function tree(owner, repo, sha) {
+        function tree(owner, repo, sha, token) {
+            $http.defaults.headers.common.Authorization = 'token ' + token;
             return $http.get('https://api.github.com/repos/' + owner + '/' + repo +
                 '/git/trees/' + sha + '?recursive=1').then(
                 function success(response) {
@@ -144,14 +146,15 @@ mainApp.service('GithubService', ['$http', 'Base64',
             return GithubDelete(token).delete({owner: owner, repo: repo});
         };
 
-        this.repoTree = function (owner, repo, branch) {
-            return commitInfo(owner, repo, branch)
+        this.repoTree = function (owner, repo, branch, token) {
+            return commitInfo(owner, repo, branch, token)
                 .then(function (sha) {
-                    if (sha) return tree(owner, repo, sha)
+                    if (sha) return tree(owner, repo, sha, token)
                 });
         };
 
-        this.getFile = function (owner, repo, path) {
+        this.getFile = function (owner, repo, path, token) {
+            $http.defaults.headers.common.Authorization = 'token ' + token;
             return $http.get('https://api.github.com/repos/' + owner + '/' + repo +
                 '/contents/' + path);
         };
@@ -181,7 +184,7 @@ mainApp.service('GithubService', ['$http', 'Base64',
 
         this.updateTravisFile = function (owner, repo, token) {
             var ghService = this;
-            this.getFile(owner, repo, '.travis.yml').then(
+            this.getFile(owner, repo, '.travis.yml', token).then(
                 function success(response) {
                     var content = Base64.decode(response.data.content);
                     var config = jsyaml.load(content);
