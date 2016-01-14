@@ -184,7 +184,7 @@ mainApp.service('GithubService', ['$http', 'Base64',
 
         this.updateTravisFile = function (owner, repo, token) {
             var ghService = this;
-            this.getFile(owner, repo, '.travis.yml', token).then(
+            return this.getFile(owner, repo, '.travis.yml', token).then(
                 function success(response) {
                     var content = Base64.decode(response.data.content);
                     var config = jsyaml.load(content);
@@ -208,7 +208,12 @@ mainApp.service('GithubService', ['$http', 'Base64',
                     }
                     content = jsyaml.dump(config);
 
-                    return ghService.updateFile(owner, repo, '.travis.yml', content, response.data.sha, token);
-            });
+                    return {content : content, sha: response.data.sha};
+                    //return ghService.updateFile(owner, repo, '.travis.yml', content, response.data.sha, token);
+            }).then(
+                function(data) {
+                    return ghService.updateFile(owner, repo, '.travis.yml', data.content, data.sha, token);
+                }
+            );
         }
     }]);

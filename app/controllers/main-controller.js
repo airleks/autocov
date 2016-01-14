@@ -49,17 +49,16 @@ mainApp.controller('MainController', [
                     log('.travis.yml file for ' + $scope.user.login + '/' + repo.repo + ' created successfully');
                 },
                 function error() {
-                    GithubService.updateTravisFile($scope.user.login, repo.repo, $scope.github.token)
-                    //    .$promise.then(
-                    //    function() {
-                    //        repo.travis = true;
-                    //        log('.travis.yml file for ' + $scope.user.login + '/' + repo.repo + ' updated successfully');
-                    //    },
-                    //    function() {
-                    //        repo.travis = false;
-                    //        log('Failed to create .travis.yml file for ' + $scope.user.login + '/' + repo.repo);
-                    //    }
-                    //);
+                    GithubService.updateTravisFile($scope.user.login, repo.repo, $scope.github.token).then(
+                        function() {
+                            repo.travis = true;
+                            log('.travis.yml file for ' + $scope.user.login + '/' + repo.repo + ' updated successfully');
+                        },
+                        function() {
+                            repo.travis = false;
+                            log('Failed to create .travis.yml file for ' + $scope.user.login + '/' + repo.repo);
+                        }
+                    );
                 }
             );
         }
