@@ -78,7 +78,7 @@
           <button class="btn btn-default" ng-click="prepare();">Prepare</button>
           <button class="btn btn-primary" ng-click="fork();">Fork</button>
           <button class="btn btn-primary" ng-click="createTravisFile();">Create Travis File</button>
-          <button class="btn btn-success" ng-click="travisSync();" disabled="disabled">Sync with Travis</button>
+          <button class="btn btn-success" ng-click="travisSync();">Sync with Travis</button>
           <button class="btn btn-primary" ng-click="setupBuildFiles();">Setup Build Files</button>
           <button class="btn btn-success" ng-click="travisBuild();" disabled="disabled">Travis Build</button>
           <button class="btn btn-danger" ng-click="checkCoverage();">Check Coverage</button>
@@ -92,6 +92,7 @@
           <th>Repo</th>
           <th>Stars</th>
           <th>Type</th>
+          <th>Commit</th>
           <th>Forked</th>
           <th>Travis .yml</th>
           <th>Travis sync</th>
@@ -104,6 +105,7 @@
           <td><a class="btn vtn-link" href="{{k}}" target="_blank">{{k}}</a></td>
           <td>{{v.stars}}</td>
           <td>{{v.type}}</td>
+          <td>{{v.commit}}</td>
           <td>
             <!--<span ng-show="{{v.forked}}" class="glyphicon glyphicon glyphicon-ok text-success" aria-hidden="true"></span>-->
             <!--<span ng-hide="{{v.forked}}" class="glyphicon glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>-->

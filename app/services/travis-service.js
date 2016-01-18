@@ -1,12 +1,12 @@
 'use strict';
 
 // describe Travis API
-var TRAVIS = 'https://api.travis-ci.org';
+var TRAVIS = 'http://localhost:8080/travis';
 
 mainApp.factory('TravisAuth', ['$resource', function($resource) {
     return function() {
-        return $resource(TRAVIS + '/auth/github', {}, {
-            post: {method: 'POST', cache: false, isArray: false,
+        return $resource(TRAVIS + '/token', {}, {
+            post: {method: 'GET', cache: false, isArray: false,
                 headers: {
                     'User-Agent': 'DevFactoryClient',
                     //'Travis-API-Version' : 2,
@@ -51,3 +51,14 @@ mainApp.factory('TravisAuth', ['$resource', function($resource) {
 // launch job
 
 // check job
+
+mainApp.service('TravisService', ['$http', function($http) {
+    this.token = function(token) {
+        $http.get(TRAVIS + '/token?github_token=' + token, {}).then(
+            function(response)
+            {
+                console.log(JSON.stringify(response));
+            }
+        );
+    }
+}]);

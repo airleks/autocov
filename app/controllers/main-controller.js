@@ -2,12 +2,12 @@ mainApp.controller('MainController', [
     '$scope', '$http', 'Base64',
     'RepoAnalyzer',
     'GithubService',
-    'TravisAuth',
+    'TravisService',
     'CodecovService',
 
     function ($scope, $http, Base64,
               RepoAnalyzer,
-              GithubService, TravisAuth, CodecovService) {
+              GithubService, TravisService, CodecovService) {
         function parseGithubUrl(url) {
             // todo replace with url format validation
             if (!url || url.length == 0) return null;
@@ -21,6 +21,7 @@ mainApp.controller('MainController', [
             GithubService.repo(repo.owner, repo.repo, $scope.github.token).$promise.then(
                 function success(response) {
                     repo.stars = response['stargazers_count'];
+                    repo.commit = response['pushed_at'];
                     repo.branch = response['default_branch'];
                 },
                 function error() {
@@ -216,6 +217,10 @@ mainApp.controller('MainController', [
             for (var i in $scope.repos) {
                 setupRepoBuildFile($scope.repos[i]);
             }
+        };
+
+        $scope.travisSync = function() {
+            TravisService.token($scope.github.token);
         };
 
         $scope.checkCoverage = function() {
